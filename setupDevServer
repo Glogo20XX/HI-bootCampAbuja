@@ -1,469 +1,105 @@
-<htmlform formUuid="bc79e8bd-eb84-4cbd-a9fe-178abe240e28" formName="TB Patient Referral or Transfer Form" formEncounterType="548cf79b-a10b-463a-8218-ba952918d3c1" formVersion="1.0">
-    <style>
-        .section {
-            border: 1px solid $headerColor;
-            padding: 2px;
-            text-align: left;
-            margin-bottom: 1em;
-        }
-
-        .sectionHeader {
-            background-color: #2f1c55;
-            color: white;
-            /* display: block; */
-            padding: 2px;
-            font-weight: bold;
-        }
-
-        table tr:nth-child(even) {
-            background: #ffffff;
-        }
-
-        .alnright {
-            text-align: right;
-            color: #000000;
-            width: 25%;
-        }
-
-        .alnright_s {
-            text-align: right;
-            color: #000000;
-            width: 13%;
-        }
-
-        .alnleft_s {
-            text-align: left;
-            color: #000000;
-            width: 13%;
-        }
-
-        .alnleft_j {
-            text-align: left;
-            color: #000000;
-            width: 20%;
-        }
-
-        .alnleft {
-            text-align: left;
-            color: #000000;
-            width: 25%;
-        }
-
-        .error {
-            color: red;
-        }
-
-        td {
-            border: none;
-        }
-
-        table th, table td {
-            padding: 5px 10px;
-            border: None;
-        }
-
-        .legend_style {
-            max-width: 35%;
-            background: #FAFAFA;
-        <!-- padding: 5px; -->
-            margin: 0px left;
-            box-shadow: 1px 1px 25px rgba(0,0,0,0.10);
-            border-radius: 2px;
-            border: 1px solid #305a72;
-            border-bottom-left-radius: 2px;
-            text-transform: initial;
-        }
-
-        form fieldset, .form fieldset {
-            min-width: 98%;
-            border: none;
-            border-top: 1px solid #305a72;
-        }
-
-        table th, table td {
-            padding: 5px 10px;
-            /* border: 1px solid #DDD; */
-        }
-
-        table tr {
-            border: None;
-        }
-
-        ul.select, .form input, .form select, .form textarea, .form ul.select {
-            padding: 2px 10px;
-        }
-
-        form input, form select, form textarea, form ul.select, .form input, .form select, .form textarea, .form
-        ul.select {
-            padding: 2px 10px;
-        }
-
-        form select, .form select {
-            max-width: 150px;
-            min-width: 100px;
-        }
-
-        body {
-            font-family: "OpenSans", Arial, sans-serif;
-            color: #363463;
-            font-size: 14px;
-        }
-
-        .alnVertical {
-            vertical-align: top;
-        }
-        .td_overwrote {
-            border: 1px solid black;
-        }
-    </style>
-    <script type="text/javascript">
-        beforeSubmit.push(function() {
-            var val_encounterDate = getValue('encounterDate.value');
-            var val_next_appointment = getValue('next_appointment.value');
-            if (val_encounterDate > val_next_appointment) {
-                getField('next_appointment.error').html('Next appointment date has to be later than visit date').show();
-                return false;
-            }
-
-            return true;
-        });
-    </script>
-
-    <script type="text/javascript">
-
-        var $ = jQuery;
-        $(document).ready(function () {
-            $('.hasDatepicker').attr('readonly', true);
-        });
-        $(document).ready(function ()
-        {
-            $('#height').keyup(calBMI);
-            $('#weight').keyup(calBMI);
-            $('#length').keyup(calBMI);
-
-            $('#lmp').change(function(e) {
-                calEDD();
-            });
-
-            $('#ge').keyup(function(e) {
-                calEDDwithGe();
-            });
-        });
-
-        function getCustomDate(date){
-            console.log("Date:" + date);
-            var dd = date.getDate();
-            var mm = date.getMonth() + 1;
-            var yyyy = date.getFullYear();
-            console.log("Day: " + dd);
-            console.log(mm);
-            console.log(yyyy);
-            var d= dd;
-            var m = mm;
-            if(!isNaN(dd)){
-                if (10 > dd) {
-                    d = "0" + dd;
-                }
-                if(!isNaN(mm)){
-                    if (10 > mm) {
-                        m = "0" + mm;
-                    }
-                }
-                return yyyy + "-" + m + "-" + d;
-            }
-        }
-        function calEDDwithGe(){
-            setValue("edd.value", "");
-            if(!isNaN(getValue("ge.value"))) {
-                var rWeeks = 40 - getValue("ge.value");
-                var edd = new Date();
-                var lmp = new Date();
-                edd = edd.setDate(edd.getDate() + (rWeeks * 7));
-                lmp = lmp.setDate(lmp.getDate() - (getValue("ge.value") * 7));
-                setValue('edd.value', getCustomDate(new Date(edd)));
-                setValue('lmp.value', getCustomDate(new Date(lmp)));
-            }else{
-                setValue("ge.value", "");
-            }
-        }
-        function calEDD() {
-            var lmp = new Date(getValue('lmp.value'));
-            if (lmp != null) {
-                lmp = lmp.setDate(lmp.getDate() + 280);
-                var Difference_In_Time = new Date().getTime() - new Date(getValue('lmp.value')).getTime();
-                var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-                setValue("ge.value", Math.round(Difference_In_Days / 7));
-                console.log(lmp);
-//setValue('edd.value', null);
-                setValue('edd.value', getCustomDate(new Date(lmp)));
-            }
-        }
-
-        function calBMI(){
-            var height_val = getValue('height.value');
-            var weight_val = getValue('weight.value');
-            var length_val = getValue('length.value');
-            if(height_val == 0){
-                height_val = 1;
-            }
-            if(weight_val == 0){
-                weight_val = 1;
-            }
-            var height_num = parseFloat(height_val);
-            var weight_num = parseFloat(weight_val);
-            var length_num = parseFloat(length_val);
-
-            if(!isNaN(height_num)){
-                if(!isNaN(weight_num)){
-                    height_num = height_num/100;
-                    var bmi_val = weight_num / (height_num * height_num);
-                    if(!isNaN(bmi_val)){
-                        if(height_val == 1){
-                            setValue('bmi.value',0);
-                        }else if(weight_val == 1){
-                            setValue('bmi.value',0);
-                        }else{
-                            setValue('bmi.value',bmi_val.toFixed(2));
-                        }
-                    }
-                }else{
-                }
-            }else if(!isNaN(length_num)){
-                if(!isNaN(weight_num)){
-                    length_num  = length_num/100;
-                    var bmi_val = weight_num / (length_num* length_num);
-                    if(!isNaN(bmi_val)){
-                        if(height_val == 1){
-                            setValue('bmi.value',0);
-                        }else if(weight_val == 1){
-                            setValue('bmi.value',0);
-                        }else if(length_val == 1){
-                            setValue('bmi.value',0);
-                        }else{
-                            setValue('bmi.value',bmi_val.toFixed(2));
-                        }
-                    }
-                }else{
-
-                }
-            }else {
-
-            }
-
-            if(height_val.length > 0){
-                setValue('length.value', "");
-                $('#length').hide(200);
-            }else{
-                $('#length').show(200);
-            }
-
-            if(length_val.length > 0){
-                setValue('height.value', "");
-                $('#height').hide(200);
-            }else{
-                $('#height').show(200);
-            }
-        }
-    </script>
-
-    <table style="margin-bottom: 20px;">
-        <thead>
-        <tr>
-            <th style="text-align: center">TB Patient Referral or Transfer Form</th>
-        </tr>
-        </thead>
-    </table>
-
-
-       <!-- <fieldset style="border: 1px solid #305a72; min-width: 90%; margin-left: 5%; padding: 6px; margin-bottom: 2%; border-radius: 12px;"  >
-           <legend class="legend_style">Last Clinical Parameters</legend>
-           <table id="dashboard" cellspacing="10" cellpadding="5" align="center">
-
-               <tr><td><b>Weight: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('5089').valueNumeric" /></font>kg <lookup expression="fn.latestObs('5089').obsDatetime" /></td><td><b>Height: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('5090').valueNumeric" /></font> cm <lookup expression="fn.latestObs('5090').obsDatetime" /></td><td><b>CD4 Count: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('5497').valueNumeric" /></font> c/mm <sup>3</sup> <lookup expression="fn.latestObs('5497').obsDatetime" /></td></tr>
-               <tr>
-                   <excludeIf velocityTest="$fn.latestObs('856').obsDatetime == ''">
-                       <includeIf velocityTest="!$fn.latestObs('166422').valueCoded">
-                           <td><b>Viral Load: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('856').valueNumeric" /></font> copies/ml <lookup expression="fn.latestObs('856').obsDatetime" /></td>
-                       </includeIf>
-                       <includeIf velocityTest="$fn.latestObs('166422').valueCoded">
-                           <includeIf velocityTest="$fn.latestObs('166422').valueCoded == 'Concept #166426'">
-                               <td><b>Viral Load: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('856').valueNumeric" /></font> copies/ml <lookup expression="fn.latestObs('856').obsDatetime" /></td>
-                           </includeIf>
-
-                           <includeIf velocityTest="$fn.latestObs('166422').valueCoded != 'Concept #166426'">
-                               <td><b>Viral Load: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs('166422').valueCoded.name" /></font> <lookup expression="fn.latestObs('166422').obsDatetime" /></td>
-                           </includeIf>
-
-                       </includeIf>
-                   </excludeIf>
-
-                   <td><b>Regimen: </b></td><td><b>ART Start Date: </b><font color='blue' style="font-weight: bold"><lookup expression="fn.latestObs(159599).getValueDatetime()" /></font>
-               </td>
-               </tr>
-           </table>
-       </fieldset> -->
-<!--    dusted 01:05 Nov 22 2021-->
-
-        <table>
-            <tr>
-                <td class="alnright">Visit Date</td>
-                <td>
-                    <encounterDate  id="encounterDate" showTime="false" allowFutureDates="false" required="true" />
-                </td>
-                <td></td>
-            </tr>
-        </table>
-
-<!--    dusted.. -->
-
-    <table>
-            <tr>
-                <td class="alnleft_s">Patient Name:</td>
-                <td class="alnleft_s"><span ><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">Other Names : </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-            </tr>
-
-        </table>
-
-        <table width="100%">
-            <tr>
-                <td class="alnleft_s">Patient Address (Detailed address with landmark): </td>
-                <td class="alnleft_s"><span ><obs conceptId="166461" /></span></td>
-            </tr>
-            <tr>
-                <td class="alnleft_s">Phone Number :</td>
-                <td class="alnleft_s"><span ><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">Sex : </td>
-                <td class="alnleft_s"><span ><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">Age :</td>
-                <td class="alnleft_s"><span ><obs conceptId="166461" /></span></td>
-            </tr>
-
-        </table>
-<!--    </fieldset>-->
-<fieldset>
-    <legend class="legend_style">Tick as appropriate:    </legend>
-
-    <table width="100%">
-
-
-       <td>
-           <tr>
-            <label style="width: 170px;">DSTB</label>
-            <obs conceptId="1271" answerConceptId="657" answerLabel="" />
-
-            <label style="width: 170px;">DRTB</label>
-            <obs conceptId="1271" answerConceptId="856" answerLabel="" />
-
-            <label style="width: 170px;">Transfer</label>
-            <obs conceptId="1271" answerConceptId="657" answerLabel="" />
-
-            <label style="width: 170px;">Refer</label>
-            <obs conceptId="1271" answerConceptId="856" answerLabel="" />
-        </tr>
-
-        </td>
-
-    </table>
-</fieldset>
-
-<!-- check point -->
-        <fieldset>
-                <legend class="legend_style">Referring From</legend>
-                <table>
-            <tr>
-
-                <td class="alnleft_s">Facility Name:</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">LGA </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-                <td class="alnleft_s">State </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-            </tr>
-                </table>
-            </fieldset>
-
-    <fieldset>
-        <legend class="legend_style">Referring To</legend>
-        <table>
-            <tr>
-
-                <td class="alnleft_s">Facility Name:</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">LGA </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-                <td class="alnleft_s">State </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-            </tr>
-        </table>
-    </fieldset>
-
-    <fieldset>
-        <legend class="legend_style">Type of Patient (initial classification)</legend>
-        <table>
-            <tr>
-
-                <td class="alnleft_s">Facility Name:</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-
-
-            </tr>
-        </table>
-    </fieldset>
-
-    <fieldset>
-        <legend class="legend_style">Reason for Referral</legend>
-        <table>
-            <tr>
-
-                <td class="alnleft_s">DR-TB Treatment</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-
-                <td class="alnleft_s">Others (Specify)</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-
-
-            </tr>
-        </table>
-    </fieldset>
-
-
-    <fieldset>
-        <legend class="legend_style">Laboratory Results</legend>
-        <table>
-            <tr>
-                <tr>
-                <td class="alnleft_s">Specimen ID NO:</td>
-                <td class="alnleft_s"><span><obs conceptId="166461" /></span></td>
-                </tr>
-
-                <td class="alnleft_s">Smear </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-                <td class="alnleft_s">Xpert MTB/R if assay </td>
-                <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-            <td class="alnleft_s">Culture </td>
-            <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-            <td class="alnleft_s">Others </td>
-            <td class="alnleft_s"><span ><obs conceptId="166015" /></span></td>
-
-
-
-            </tr>
-        </table>
-    </fieldset>
-
-   </htmlform>
+# configure dev server for openmrs form development --fresh linux-ubuntu 20.04 install
+# ********************************HI Bootcamp Abuja ******************************** #'
+# ******************************** startDate:19th-November-2021 ******************************** #'
+# ******************************** Walkthrough for fresh Linux install ******************************** #'
+
+sudo apt update
+
+sudo apt upgrade
+
+# ------------------------------------------------------------------------------------------
+
+# -- install required programs: maven, java, mysql, code editor (intelliJ highly recommended)
+
+# -- install java to usr/lib/jvm/jdk1.8.0_202
+
+# -- install mysql
+
+echo ' # ***************Installing Apache Maven 3.6.3******************************** #'
+echo ' # ***************HI Bootcamp Abuja******************************** #'
+
+
+sudo apt install maven -y
+
+# check maven's version
+
+mvn -v
+
+sudo apt install git
+
+# ------------------------------------------------------------------------------------------
+
+# create directory for hosting the dev-server
+mkdir ~/HI-bootCampAbuja
+
+# goto github.com and copy the code-url of the repository you want to clone
+
+# cd into just created dev-server
+cd ~/HI-bootCampAbuja || return
+
+git init
+
+git clone code-url # (where code-url is the link you copied from github)
+
+# cd into the openmrs-module-nmrsmetadata directory
+
+# at the Setting up a new server prompt
+
+# Specify server id (-DserverId) (default: 'server'): say dev-server
+
+# You can setup the following servers:
+# 1) Distribution
+# 2) Platform
+
+# Which one do you choose? [1/2]: 1
+
+You can setup the following servers:
+1) Distribution
+2) Platform
+
+Which one do you choose? [1/2]: 1 for distribution
+
+You can deploy the following versions of distribution:
+1) Reference Application 3.0.0-SNAPSHOT
+2) Reference Application 2.12.0
+3) Reference Application 2.11.0
+4) Reference Application 2.10.0
+5) Reference Application 2.9.0
+6) Other...
+
+Which one do you choose? [1/2/3/4/5/6]: 6
+
+Please specify distribution artifact (default: 'org.openmrs.distro:referenceapplication-package:2.4'): enter the full path for 2.6.0
+
+org.openmrs.distro:referenceapplication-package:2.6.0
+
+What port would you like your server to use? (default: '8080'): choose any available port say 1234
+
+If you want to enable remote debugging by default when running the server,
+specify the port number here (e.g. 1044). Leave blank to disable debugging.
+(Do not do this on a production server) (default: 'no debugging'):
+
+Leave blank to accept default no debugging
+
+Which database would you like to use?:
+1) MySQL 5.6 and above (requires pre-installed MySQL 5.6 and above)
+2) MySQL 5.6 and above in SDK docker container (requires pre-installed Docker)
+3) Existing docker container (requires pre-installed Docker)
+
+Which one do you choose? [1/2/3]: 1 to choose MySQL 5.6 and above
+
+The distribution requires a MySQL database. Please specify database uri (-DdbUri) (default: 'jdbc:mysql://localhost:3306/@DBNAME@'):
+enter the fully qualified path of your MySQL database say.. jdbc:mysql://localhost:3306/openmrs
+
+Please specify database username (-DdbUser) (default: 'root'): root
+Please specify database password (-DdbPassword): *****
+
+
+
+
+
+
+
+
+
+
